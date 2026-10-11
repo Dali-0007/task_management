@@ -1,0 +1,18 @@
+
+.sign-in-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sign-in-button {
+  min-height: 46px;
+  text-transform: none;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.sign-up-prompt {
+  text-align: center;
+  font-size: 14px;
+}
