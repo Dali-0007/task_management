@@ -19,6 +19,8 @@ function SignIn() {
     showPassword,
     setShowPassword,
     error,
+    successMessage,
+    isSubmitting,
     handleChange,
     handleSubmit,
   } = useSignIn();
@@ -30,7 +32,11 @@ function SignIn() {
     >
       <form className="sign-in-form" onSubmit={handleSubmit}>
         {error && <Alert severity="error">{error}</Alert>}
-
+        {successMessage && (
+          <Alert severity="success">
+            {successMessage}
+          </Alert>
+        )}
         <TextField
           label="Email Address"
           name="email"
@@ -68,13 +74,8 @@ function SignIn() {
           }}
         />
 
-        <Button
-          type="submit"
-          variant="contained"
-          fullWidth
-          className="sign-in-button"
-        >
-          Sign In
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Signing in..." : "Sign In"}
         </Button>
 
         <Typography className="sign-up-prompt">

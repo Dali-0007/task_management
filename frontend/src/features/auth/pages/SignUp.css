@@ -1,0 +1,29 @@
+
+.sign-up-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sign-up-button {
+  min-height: 46px;
+  text-transform: none;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.sign-in-prompt {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+  text-align: center;
+}
+
+.sign-in-prompt a {
+  color: #1976d2;
+  text-decoration: none;
+}
+
+.sign-in-prompt a:hover {
+  text-decoration: underline;
+}

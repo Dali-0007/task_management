@@ -1,8 +1,9 @@
 
 import { useState } from "react";
+import { signInUser } from "../services/authService";
 import { validateSignIn } from "../validation/authValidation";
 
-function useSignIn() {
+export default function useSignIn() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -10,6 +11,8 @@ function useSignIn() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -20,31 +23,51 @@ function useSignIn() {
     }));
 
     setError("");
+    setSuccessMessage("");
   }
 
+  async function handleSubmit(event) {
+    event.preventDefault();
 
-function handleSubmit(event) {
-  event.preventDefault();
+    if (isSubmitting) return;
 
-  const validationErrors = validateSignIn(formData);
+    setError("");
+    setSuccessMessage("");
 
-  if (Object.keys(validationErrors).length > 0) {
-    setError(Object.values(validationErrors)[0]);
-    return;
+    const validationErrors = validateSignIn(formData);
+    const firstValidationError = Object.values(validationErrors)[0];
+
+    if (firstValidationError) {
+      setError(firstValidationError);
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await signInUser(formData);
+
+      setSuccessMessage(
+        response.message || "Signed in successfully."
+      );
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          "Unable to sign in. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
-
-  setError("");
-  console.log("Sign-in form validation successful.");
-}
 
   return {
     formData,
     showPassword,
     setShowPassword,
     error,
+    successMessage,
+    isSubmitting,
     handleChange,
     handleSubmit,
   };
 }
-
-export default useSignIn;
