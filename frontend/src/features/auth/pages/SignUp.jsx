@@ -5,8 +5,11 @@ import {
   TextField,
   InputAdornment,
   IconButton,
+  Typography,
+  Link as MuiLink,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { Link as RouterLink } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
 import useSignUp from "../hooks/useSignUp";
 import "./SignUp.css";
@@ -26,13 +29,17 @@ function SignUp() {
   return (
     <AuthLayout
       title="Create Account"
-      subtitle="Register to get started"
+      subtitle="Join your team and organize your work"
     >
       <form className="sign-up-form" onSubmit={handleSubmit}>
         {error && <Alert severity="error">{error}</Alert>}
-        {successMessage && <Alert severity="success">{successMessage}</Alert>}
-        {error && ( <Alert severity="error"> {error}</Alert>)}
+
+        {successMessage && (
+          <Alert severity="success">{successMessage}</Alert>
+        )}
+
         <TextField
+          className="auth-field"
           label="Full Name"
           name="name"
           value={formData.name}
@@ -40,9 +47,11 @@ function SignUp() {
           fullWidth
           required
           autoComplete="name"
+          placeholder="Enter your full name"
         />
 
         <TextField
+          className="auth-field"
           label="Email Address"
           name="email"
           type="email"
@@ -51,9 +60,11 @@ function SignUp() {
           fullWidth
           required
           autoComplete="email"
+          placeholder="you@company.com"
         />
 
         <TextField
+          className="auth-field"
           label="Password"
           name="password"
           type={showPassword ? "text" : "password"}
@@ -62,13 +73,18 @@ function SignUp() {
           fullWidth
           required
           autoComplete="new-password"
+          placeholder="Create a password"
           slotProps={{
             input: {
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                    onClick={() => setShowPassword((visible) => !visible)}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                    onClick={() =>
+                      setShowPassword((visible) => !visible)
+                    }
                     edge="end"
                   >
                     {showPassword ? <VisibilityOff /> : <Visibility />}
@@ -80,6 +96,7 @@ function SignUp() {
         />
 
         <TextField
+          className="auth-field"
           label="Confirm Password"
           name="confirmPassword"
           type={showPassword ? "text" : "password"}
@@ -88,17 +105,25 @@ function SignUp() {
           fullWidth
           required
           autoComplete="new-password"
+          placeholder="Re-enter your password"
         />
 
-      <Button type="submit" disabled={isSubmitting}>
-  {isSubmitting ? "Creating account..." : "Sign Up"}
-</Button>
+        <Button
+          className="auth-submit-button"
+          type="submit"
+          variant="contained"
+          fullWidth
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Creating account..." : "Create Account"}
+        </Button>
 
-        <p className="sign-in-prompt">
+        <Typography className="auth-prompt">
           Already have an account?{" "}
-          <a href="/sign-in">Sign in</a>
-        </p>
-        
+          <MuiLink component={RouterLink} to="/sign-in" underline="hover">
+            Sign in
+          </MuiLink>
+        </Typography>
       </form>
     </AuthLayout>
   );
