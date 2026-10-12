@@ -100,10 +100,9 @@ function DashboardContent({ role, userName }) {
       <div className="dashboard-welcome">
         <div>
           <div className="welcome-eyebrow">YOUR WORKSPACE</div>
-          <h1>{isManager ? "Team Overview" : "Good to see you, Dali!"}</h1>
           <h1>
-  {isManager ? "Team Overview" : `Good to see you, ${userName}!`}
-</h1>
+            {isManager ? "Team Overview" : `Good to see you, ${userName}!`}
+          </h1>
         </div>
         <div className="dashboard-date">
           <CalendarMonthOutlined fontSize="small" />

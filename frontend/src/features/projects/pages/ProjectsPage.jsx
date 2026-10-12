@@ -20,9 +20,32 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import FolderOutlined from "@mui/icons-material/FolderOutlined";
+import Autorenew from "@mui/icons-material/Autorenew";
+import Inventory2Outlined from "@mui/icons-material/Inventory2Outlined";
+import GroupsOutlined from "@mui/icons-material/GroupsOutlined";
+import CalendarMonthOutlined from "@mui/icons-material/CalendarMonthOutlined";
 
 import DashboardLayout from "../../../components/dashboard/DashboardLayout";
 import useProjects from "../hooks/useProjects";
+import {
+  cardActionsSx,
+  cardMetaSx,
+  cardSx,
+  cardTitleSx,
+  detailRowSx,
+  emptyStateSx,
+  eyebrowSx,
+  filterFieldSx,
+  headerButtonSx,
+  pageHeaderSx,
+  pageSubtitleSx,
+  pageTitleSx,
+  statCardSx,
+  statIconSx,
+  statLabelSx,
+  statValueSx,
+} from "../../../styles/commonStyles";
 
 const emptyForm = { name: "", description: "" };
 
@@ -127,30 +150,53 @@ function ProjectsContent({ role }) {
     }
   }
 
+
+  const stats = [
+    {
+      label: "Total projects",
+      value: projects.length,
+      icon: FolderOutlined,
+      tone: "indigo",
+    },
+    {
+      label: "Active",
+      value: projects.filter((project) => project.status === "ACTIVE").length,
+      icon: Autorenew,
+      tone: "green",
+    },
+    {
+      label: "Archived",
+      value: projects.filter((project) => project.status === "ARCHIVED").length,
+      icon: Inventory2Outlined,
+      tone: "gray",
+    },
+  ];
+
   return (
-    <Box sx={{ p: { xs: 2, md: 3 } }}>
+    <Box>
       <Stack
         direction={{ xs: "column", sm: "row" }}
         justifyContent="space-between"
-        alignItems={{ xs: "stretch", sm: "center" }}
-        spacing={2}
-        sx={{ mb: 3 }}
+        alignItems={{ xs: "stretch", sm: "flex-end" }}
+        sx={pageHeaderSx}
       >
         <Box>
-          <Typography variant="h4" fontWeight={700}>
+          <Typography sx={eyebrowSx}>Workspace</Typography>
+          <Typography component="h1" sx={pageTitleSx}>
             Projects
           </Typography>
-          <Typography color="text.secondary">
+          <Typography sx={pageSubtitleSx}>
             View and manage your team's projects.
           </Typography>
         </Box>
 
-        <Stack direction="row" spacing={1}>
+        <Stack direction="row" spacing={1.5} sx={{ flexShrink: 0 }}>
           <Button
             variant="outlined"
             startIcon={<RefreshIcon />}
             onClick={loadProjects}
             disabled={isLoading}
+            sx={headerButtonSx}
           >
             Refresh
           </Button>
@@ -160,6 +206,7 @@ function ProjectsContent({ role }) {
               variant="contained"
               startIcon={<AddIcon />}
               onClick={openCreateDialog}
+              sx={headerButtonSx}
             >
               New Project
             </Button>
@@ -172,32 +219,17 @@ function ProjectsContent({ role }) {
         spacing={2}
         sx={{ mb: 3 }}
       >
-        <Paper variant="outlined" sx={{ p: 2, flex: 1 }}>
-          <Typography color="text.secondary" variant="body2">
-            Total projects
-          </Typography>
-          <Typography variant="h5" fontWeight={700}>
-            {projects.length}
-          </Typography>
-        </Paper>
-
-        <Paper variant="outlined" sx={{ p: 2, flex: 1 }}>
-          <Typography color="text.secondary" variant="body2">
-            Active
-          </Typography>
-          <Typography variant="h5" fontWeight={700}>
-            {projects.filter((project) => project.status === "ACTIVE").length}
-          </Typography>
-        </Paper>
-
-        <Paper variant="outlined" sx={{ p: 2, flex: 1 }}>
-          <Typography color="text.secondary" variant="body2">
-            Archived
-          </Typography>
-          <Typography variant="h5" fontWeight={700}>
-            {projects.filter((project) => project.status === "ARCHIVED").length}
-          </Typography>
-        </Paper>
+        {stats.map(({ label, value, icon: Icon, tone }) => (
+          <Paper key={label} variant="outlined" sx={statCardSx}>
+            <Box>
+              <Typography sx={statLabelSx}>{label}</Typography>
+              <Typography sx={statValueSx}>{value}</Typography>
+            </Box>
+            <Box sx={statIconSx[tone]}>
+              <Icon fontSize="small" />
+            </Box>
+          </Paper>
+        ))}
       </Stack>
 
       <TextField
@@ -205,7 +237,7 @@ function ProjectsContent({ role }) {
         label="Project status"
         value={statusFilter}
         onChange={(event) => setStatusFilter(event.target.value)}
-        sx={{ mb: 3, minWidth: 200 }}
+        sx={{ mb: 3, ...filterFieldSx }}
         size="small"
       >
         <MenuItem value="ALL">All projects</MenuItem>
@@ -242,7 +274,10 @@ function ProjectsContent({ role }) {
           <CircularProgress />
         </Box>
       ) : filteredProjects.length === 0 ? (
-        <Paper variant="outlined" sx={{ p: 5, textAlign: "center" }}>
+        <Paper variant="outlined" sx={emptyStateSx}>
+          <Box sx={{ ...statIconSx.indigo, mx: "auto", mb: 2 }}>
+            <FolderOutlined />
+          </Box>
           <Typography variant="h6">No projects found</Typography>
           <Typography color="text.secondary" sx={{ mt: 1 }}>
             {statusFilter === "ALL"
@@ -251,26 +286,17 @@ function ProjectsContent({ role }) {
           </Typography>
         </Paper>
       ) : (
-        <Grid container spacing={2}>
+        <Grid container spacing={2.5}>
           {filteredProjects.map((project) => (
             <Grid key={project.id} size={{ xs: 12, sm: 6, lg: 4 }}>
-              <Paper
-                variant="outlined"
-                sx={{
-                  p: 2.5,
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 1.5,
-                }}
-              >
+              <Paper variant="outlined" sx={cardSx}>
                 <Stack
                   direction="row"
                   justifyContent="space-between"
                   alignItems="flex-start"
                   spacing={1}
                 >
-                  <Typography variant="h6" fontWeight={700}>
+                  <Typography component="h3" sx={cardTitleSx}>
                     {project.name}
                   </Typography>
                   <Chip
@@ -289,27 +315,28 @@ function ProjectsContent({ role }) {
                     whiteSpace: "pre-wrap",
                     overflowWrap: "anywhere",
                     minHeight: 44,
+                    lineHeight: 1.6,
                   }}
                 >
                   {project.description || "No description provided."}
                 </Typography>
 
-                <Typography variant="body2">
-                  Members: {project.member_count ?? 0}
-                </Typography>
+                <Stack direction="row" spacing={2.5} flexWrap="wrap">
+                  <Box sx={cardMetaSx}>
+                    <GroupsOutlined />
+                    Members: {project.member_count ?? 0}
+                  </Box>
 
-                <Typography variant="caption" color="text.secondary">
-                  Created{" "}
-                  {project.created_at
-                    ? new Date(project.created_at).toLocaleDateString()
-                    : "—"}
-                </Typography>
+                  <Box sx={cardMetaSx}>
+                    <CalendarMonthOutlined />
+                    Created{" "}
+                    {project.created_at
+                      ? new Date(project.created_at).toLocaleDateString()
+                      : "—"}
+                  </Box>
+                </Stack>
 
-                <Stack
-                  direction="row"
-                  spacing={1}
-                  sx={{ mt: "auto", pt: 1, flexWrap: "wrap" }}
-                >
+                <Stack direction="row" sx={cardActionsSx}>
                   <Button
                     size="small"
                     onClick={() => setSelectedProject(project)}
@@ -332,6 +359,7 @@ function ProjectsContent({ role }) {
                         color="error"
                         startIcon={<ArchiveIcon />}
                         onClick={() => setArchiveTarget(project)}
+                        sx={{ ml: "auto" }}
                       >
                         Archive
                       </Button>
@@ -388,7 +416,7 @@ function ProjectsContent({ role }) {
             </Stack>
           </DialogContent>
 
-          <DialogActions sx={{ p: 2 }}>
+          <DialogActions>
             <Button
               onClick={() => setDialogOpen(false)}
               disabled={isSaving}
@@ -411,33 +439,52 @@ function ProjectsContent({ role }) {
         <DialogTitle>Project details</DialogTitle>
         <DialogContent>
           {selectedProject && (
-            <Stack spacing={2} sx={{ pt: 1 }}>
-              <Typography variant="h6">{selectedProject.name}</Typography>
-              <Chip
-                label={selectedProject.status}
-                color={
-                  selectedProject.status === "ACTIVE" ? "success" : "default"
-                }
-                sx={{ alignSelf: "flex-start" }}
-              />
-              <Typography color="text.secondary">
+            <Stack spacing={2} sx={{ pt: 0.5 }}>
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="flex-start"
+                spacing={1}
+              >
+                <Typography sx={{ ...cardTitleSx, fontSize: 18 }}>
+                  {selectedProject.name}
+                </Typography>
+                <Chip
+                  label={selectedProject.status}
+                  color={
+                    selectedProject.status === "ACTIVE" ? "success" : "default"
+                  }
+                  size="small"
+                />
+              </Stack>
+              <Typography
+                color="text.secondary"
+                sx={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}
+              >
                 {selectedProject.description || "No description provided."}
               </Typography>
-              <Typography variant="body2">
-                Project ID: {selectedProject.id}
-              </Typography>
-              <Typography variant="body2">
-                Members: {selectedProject.member_count ?? 0}
-              </Typography>
-              <Typography variant="body2">
-                Created by user ID: {selectedProject.created_by}
-              </Typography>
-              <Typography variant="body2">
-                Last updated:{" "}
-                {selectedProject.updated_at
-                  ? new Date(selectedProject.updated_at).toLocaleString()
-                  : "—"}
-              </Typography>
+              <Box>
+                <Box sx={detailRowSx}>
+                  <span>Project ID</span>
+                  <span>{selectedProject.id}</span>
+                </Box>
+                <Box sx={detailRowSx}>
+                  <span>Members</span>
+                  <span>{selectedProject.member_count ?? 0}</span>
+                </Box>
+                <Box sx={detailRowSx}>
+                  <span>Created by user ID</span>
+                  <span>{selectedProject.created_by}</span>
+                </Box>
+                <Box sx={detailRowSx}>
+                  <span>Last updated</span>
+                  <span>
+                    {selectedProject.updated_at
+                      ? new Date(selectedProject.updated_at).toLocaleString()
+                      : "—"}
+                  </span>
+                </Box>
+              </Box>
             </Stack>
           )}
         </DialogContent>
@@ -449,14 +496,17 @@ function ProjectsContent({ role }) {
       <Dialog
         open={Boolean(archiveTarget)}
         onClose={() => !isSaving && setArchiveTarget(null)}
+        maxWidth="xs"
       >
         <DialogTitle>Archive project?</DialogTitle>
         <DialogContent>
-          <Typography>
+          <Typography color="text.secondary" sx={{ lineHeight: 1.6 }}>
             Are you sure you want to archive{" "}
-            <strong>{archiveTarget?.name}</strong>? It will remain in the
-            database, but it will no longer be editable through the current
-            project update endpoint.
+            <Box component="strong" sx={{ color: "text.primary" }}>
+              {archiveTarget?.name}
+            </Box>
+            ? It will remain in the database, but it will no longer be
+            editable through the current project update endpoint.
           </Typography>
         </DialogContent>
         <DialogActions>

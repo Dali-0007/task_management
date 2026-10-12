@@ -12,7 +12,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Link as RouterLink } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
 import useSignUp from "../hooks/useSignUp";
-import "./SignUp.css";
+import "../components/AuthForm.css";
 
 function SignUp() {
   const {
@@ -31,7 +31,7 @@ function SignUp() {
       title="Create Account"
       subtitle="Join your team and organize your work"
     >
-      <form className="sign-up-form" onSubmit={handleSubmit}>
+      <form className="auth-form" onSubmit={handleSubmit}>
         {error && <Alert severity="error">{error}</Alert>}
 
         {successMessage && (

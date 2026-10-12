@@ -12,7 +12,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Link as RouterLink } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
 import useSignIn from "../hooks/useSignIn";
-import "./SignIn.css";
+import "../components/AuthForm.css";
 
 function SignIn() {
   const {
@@ -31,7 +31,7 @@ function SignIn() {
       title="Welcome Back"
       subtitle="Sign in to continue to your workspace"
     >
-      <form className="sign-in-form" onSubmit={handleSubmit}>
+      <form className="auth-form" onSubmit={handleSubmit}>
         {error && <Alert severity="error">{error}</Alert>}
 
         {successMessage && (

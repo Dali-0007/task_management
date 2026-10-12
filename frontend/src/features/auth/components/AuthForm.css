@@ -1,0 +1,37 @@
+/* Shared form styles for Sign In / Sign Up.
+   Field and button visuals come from the MUI theme (src/styles/theme.js). */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.auth-form .auth-submit-button {
+  min-height: 48px;
+  margin-top: 4px;
+  font-size: var(--font-size-md);
+  transition:
+    background var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.auth-form .auth-submit-button:active {
+  transform: translateY(1px);
+}
+
+.auth-form .auth-prompt {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-md);
+  text-align: center;
+}
+
+.auth-form .auth-prompt a {
+  color: var(--color-primary-dark);
+}
+
+@media (max-width: 480px) {
+  .auth-form {
+    gap: 16px;
+  }
+}
