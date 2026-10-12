@@ -1,8 +1,8 @@
-
 import { Navigate, Route, Routes } from "react-router-dom";
 import SignIn from "../features/auth/pages/SignIn";
 import SignUp from "../features/auth/pages/SignUp";
 import Dashboard from "../features/dashboard/pages/Dashboard";
+import ProjectsPage from "../features/projects/pages/ProjectsPage";
 
 function AppRoutes() {
   return (
@@ -10,6 +10,7 @@ function AppRoutes() {
       <Route path="/" element={<Navigate to="/sign-in" replace />} />
       <Route path="/sign-in" element={<SignIn />} />
       <Route path="/sign-up" element={<SignUp />} />
+      <Route path="/dashboard/projects" element={<ProjectsPage />} />
       <Route path="/dashboard/*" element={<Dashboard />} />
       <Route path="*" element={<Navigate to="/sign-in" replace />} />
     </Routes>
