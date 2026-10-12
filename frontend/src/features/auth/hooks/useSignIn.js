@@ -1,9 +1,13 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { signInUser } from "../services/authService";
 import { validateSignIn } from "../validation/authValidation";
-
+import { useAuth } from "../context/AuthContext";
 export default function useSignIn() {
+  const { refreshUser } = useAuth();
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -46,10 +50,12 @@ export default function useSignIn() {
 
     try {
       const response = await signInUser(formData);
-
+await refreshUser();
       setSuccessMessage(
         response.message || "Signed in successfully."
       );
+
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       setError(
         err.response?.data?.message ||

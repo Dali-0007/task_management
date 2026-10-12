@@ -1,4 +1,3 @@
-
 import axios from "axios";
 
 const apiClient = axios.create({
@@ -7,6 +6,7 @@ const apiClient = axios.create({
     "Content-Type": "application/json",
   },
   timeout: 10000,
+  withCredentials: true,
 });
 
 export default apiClient;

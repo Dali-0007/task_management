@@ -21,19 +21,18 @@ async function registerUser({ name, email, password }) {
   const result = await pool.query(
     `INSERT INTO users (name, email, password_hash)
      VALUES ($1, $2, $3)
-     RETURNING id, name, email, created_at`,
+     RETURNING id, name, email, role, created_at`,
     [name.trim(), normalizedEmail, passwordHash]
   );
 
   return result.rows[0];
 }
 
-
 async function loginUser({ email, password }) {
   const normalizedEmail = email.trim().toLowerCase();
 
   const result = await pool.query(
-    `SELECT id, name, email, password_hash, created_at
+    `SELECT id, name, email, password_hash, role, created_at
      FROM users
      WHERE email = $1`,
     [normalizedEmail]

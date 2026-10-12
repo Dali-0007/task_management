@@ -1,5 +1,15 @@
 
+const jwt = require("jsonwebtoken");
 const { registerUser, loginUser } = require("../services/authService");
+
+const COOKIE_NAME = "accessToken";
+
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax",
+  path: "/",
+};
 
 async function signUp(req, res) {
   try {
@@ -19,7 +29,8 @@ async function signUp(req, res) {
     if (!name.trim() || !email.trim() || password.length < 8) {
       return res.status(400).json({
         success: false,
-        message: "Enter a name, valid email, and password of at least 8 characters.",
+        message:
+          "Enter a name, valid email, and password of at least 8 characters.",
       });
     }
 
@@ -47,7 +58,6 @@ async function signUp(req, res) {
   }
 }
 
-
 async function signIn(req, res) {
   try {
     const { email, password } = req.body;
@@ -65,6 +75,22 @@ async function signIn(req, res) {
     }
 
     const user = await loginUser({ email, password });
+
+    const token = jwt.sign(
+      {
+        sub: String(user.id),
+        role: user.role,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: process.env.JWT_EXPIRES_IN || "15m",
+      }
+    );
+
+    res.cookie(COOKIE_NAME, token, {
+      ...cookieOptions,
+      maxAge: 15 * 60 * 1000,
+    });
 
     return res.status(200).json({
       success: true,
@@ -88,4 +114,25 @@ async function signIn(req, res) {
   }
 }
 
-module.exports = { signUp, signIn };
+function getCurrentUser(req, res) {
+  return res.status(200).json({
+    success: true,
+    user: req.user,
+  });
+}
+
+function signOut(req, res) {
+  res.clearCookie(COOKIE_NAME, cookieOptions);
+
+  return res.status(200).json({
+    success: true,
+    message: "Signed out successfully.",
+  });
+}
+
+module.exports = {
+  signUp,
+  signIn,
+  getCurrentUser,
+  signOut,
+};
