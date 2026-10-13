@@ -8,10 +8,15 @@ const {
 
 const COOKIE_NAME = "accessToken";
 
+// "lax" works when the frontend and API share a site (local dev, or Vercel
+// proxying /api to the backend). Use "none" only when the browser calls the
+// API on another site directly; browsers require Secure with "none".
+const sameSite = process.env.COOKIE_SAME_SITE === "none" ? "none" : "lax";
+
 const cookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "lax",
+  secure: process.env.NODE_ENV === "production" || sameSite === "none",
+  sameSite,
   path: "/",
 };
 

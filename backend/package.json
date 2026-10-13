@@ -7,7 +7,8 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "migrate": "node src/db/migrate.js",
-    "test": "node --test tests/"
+    "test": "node --test tests/",
+    "promote-manager": "node src/db/promoteUser.js"
   },
   "keywords": [],
   "author": "",
@@ -24,5 +25,8 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

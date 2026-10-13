@@ -11,15 +11,27 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const projectMemberRoutes = require("./routes/projectMemberRoutes");
 const taskRoutes = require("./routes/taskRoutes");
+// Comma-separated list of exact frontend origins allowed to send cookies.
+const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: allowedOrigins,
     credentials: true,
   })
 );
 
 app.use(express.json());
 app.use(cookieParser());
+
+// API responses are per-user; never let a CDN or proxy cache them.
+app.use("/api", (req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
 
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
@@ -54,6 +66,26 @@ app.get("/api/db-health", async (req, res) => {
   }
 });
 
+// Last-resort handler: malformed JSON bodies get a 400, anything else a
+// generic 500. Never send stack traces or internal messages to the client.
+app.use((error, req, res, next) => {
+  if (res.headersSent) return next(error);
+
+  if (error.type === "entity.parse.failed") {
+    return res.status(400).json({
+      success: false,
+      message: "Request body must be valid JSON.",
+    });
+  }
+
+  console.error("Unhandled request error:", error.message);
+
+  return res.status(error.status >= 400 && error.status < 500 ? error.status : 500).json({
+    success: false,
+    message: "Something went wrong. Please try again.",
+  });
+});
+
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server listening on port ${PORT}`);
 });

@@ -35,6 +35,12 @@ Task and project management app. Preserve existing working features; extend, don
 - Credentials and JWT secret come from `backend/.env`; never hardcode or log them.
 - Tests use a separate `adn_task_manager_test` database (the suite refuses DB names not ending in `_test`).
 
+## Deployment (free tier)
+- Frontend on Vercel (`frontend/`, `vercel.json` SPA rewrite), backend on Render (`backend/`), Postgres on Neon.
+- Config is env-only: backend `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `NODE_ENV`, `CORS_ORIGIN`, `COOKIE_SAME_SITE`; frontend `VITE_API_URL` (build-time, public). See `*/.env.example`.
+- Preferred: Vercel proxies `/api/*` to Render so the auth cookie is first-party (`VITE_API_URL=/api`, `COOKIE_SAME_SITE=lax`).
+- First manager: sign up, then `npm run promote-manager -- <email>` against the target database.
+
 ## Commands
 ```bash
 # backend
