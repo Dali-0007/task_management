@@ -1,99 +1,86 @@
-
+import { Link } from "react-router-dom";
 import {
   ArrowForward,
+  AssignmentOutlined,
   CalendarMonthOutlined,
-  CheckCircle,
+  FolderOutlined,
   GroupsOutlined,
-  MoreHoriz,
-  TrendingUp,
 } from "@mui/icons-material";
 import DashboardLayout from "../../../components/dashboard/DashboardLayout";
+import FeatureUnavailableNotice from "../../../components/common/FeatureUnavailableNotice";
 import SummaryCards from "../components/SummaryCards";
-import TaskTable from "../components/TaskTable";
-import { demoActivity, demoProjects } from "../data/dashboardData";
+import useProjects from "../../projects/hooks/useProjects";
 import "../components/Dashboard.css";
 import { useAuth } from "../../auth/context/AuthContext";
-function ProjectOverview() {
+
+const MAX_DASHBOARD_PROJECTS = 3;
+
+function ProjectOverview({ projects, isLoading, error, onRetry }) {
+  const activeProjects = projects
+    .filter((project) => project.status === "ACTIVE")
+    .slice(0, MAX_DASHBOARD_PROJECTS);
+
+  let body;
+
+  if (isLoading) {
+    body = <p className="dashboard-state">Loading projects...</p>;
+  } else if (error) {
+    body = (
+      <div className="dashboard-state dashboard-state-error" role="alert">
+        <span>{error}</span>
+        <button type="button" className="text-action" onClick={onRetry}>
+          Retry
+        </button>
+      </div>
+    );
+  } else if (activeProjects.length === 0) {
+    body = (
+      <p className="dashboard-state">
+        You don&apos;t have any active projects yet.
+      </p>
+    );
+  } else {
+    body = (
+      <div className="project-list">
+        {activeProjects.map((project) => (
+          <article className="project-item" key={project.id}>
+            <div className="project-item-top">
+              <div className="project-icon"><FolderOutlined /></div>
+            </div>
+            <h3>{project.name}</h3>
+            <p>{project.description || "No description provided."}</p>
+            <div className="project-meta">
+              <span>
+                <GroupsOutlined fontSize="small" /> {project.member_count ?? 0} members
+              </span>
+              <span className="project-active">Active</span>
+            </div>
+          </article>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <section className="dashboard-panel">
       <div className="panel-heading">
         <div>
           <h2>Active Projects</h2>
-          <p>Progress across your workspace</p>
+          <p>Your newest active projects</p>
         </div>
-        <button className="text-action">
+        <Link className="text-action" to="/dashboard/projects">
           View all <ArrowForward fontSize="small" />
-        </button>
+        </Link>
       </div>
 
-      <div className="project-list">
-        {demoProjects.map((project) => (
-          <article className="project-item" key={project.id}>
-            <div className="project-item-top">
-              <div className="project-icon"><CheckCircle /></div>
-              <button className="icon-action" aria-label={`Options for ${project.name}`}>
-                <MoreHoriz />
-              </button>
-            </div>
-            <h3>{project.name}</h3>
-            <p>{project.description}</p>
-            <div className="project-progress-label">
-              <span>Progress</span>
-              <strong>{project.progress}%</strong>
-            </div>
-            <div
-              className="progress-track"
-              role="progressbar"
-              aria-label={`${project.name} progress`}
-              aria-valuenow={project.progress}
-              aria-valuemin={0}
-              aria-valuemax={100}
-            >
-              <div className="progress-fill" style={{ width: `${project.progress}%` }} />
-            </div>
-            <div className="project-meta">
-              <span><GroupsOutlined fontSize="small" /> {project.members} members</span>
-              <span className="project-active">{project.status}</span>
-            </div>
-          </article>
-        ))}
-      </div>
+      {body}
     </section>
   );
 }
 
-function ActivityPanel() {
-  return (
-    <section className="dashboard-panel activity-panel">
-      <div className="panel-heading">
-        <div>
-          <h2>Recent Activity</h2>
-          <p>Latest team updates</p>
-        </div>
-        <button className="icon-action" aria-label="Activity options">
-          <MoreHoriz />
-        </button>
-      </div>
-      <div className="activity-list">
-        {demoActivity.map((activity, index) => (
-          <article className="activity-item" key={activity.id}>
-            <div className={`activity-avatar activity-avatar-${index + 1}`}>
-              {activity.person.split(" ").map((part) => part[0]).join("")}
-            </div>
-            <div className="activity-copy">
-              <p><strong>{activity.person}</strong> {activity.action}</p>
-              <span>{activity.target}</span>
-              <small>{activity.time}</small>
-            </div>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function DashboardContent({ role, userName }) {
+function DashboardContent({ role, user }) {
   const isManager = role === "PROJECT_MANAGER";
+  const { projects, isLoading, error, loadProjects } = useProjects();
 
   return (
     <div className="dashboard-content">
@@ -101,7 +88,7 @@ function DashboardContent({ role, userName }) {
         <div>
           <div className="welcome-eyebrow">YOUR WORKSPACE</div>
           <h1>
-            {isManager ? "Team Overview" : `Good to see you, ${userName}!`}
+            {isManager ? "Team Overview" : `Good to see you, ${user.name}!`}
           </h1>
         </div>
         <div className="dashboard-date">
@@ -115,26 +102,27 @@ function DashboardContent({ role, userName }) {
         </div>
       </div>
 
-      <SummaryCards role={role} />
+      <SummaryCards
+        projects={projects}
+        role={role}
+        userId={user.id}
+        isLoading={isLoading}
+      />
 
-      <div className="dashboard-insight">
-        <div className="insight-icon"><TrendingUp /></div>
-        <div>
-          <strong>{isManager ? "Your team is making progress" : "Keep your momentum going"}</strong>
-          <p>
-            {isManager
-              ? "Review upcoming deadlines and check projects that need attention."
-              : "Focus on your in-progress tasks and upcoming deadlines."}
-          </p>
-        </div>
-      </div>
+      <ProjectOverview
+        projects={projects}
+        isLoading={isLoading}
+        error={error}
+        onRetry={() => loadProjects().catch(() => {})}
+      />
 
-      <TaskTable role={role} />
-
-      <div className="dashboard-lower-grid">
-        <ProjectOverview />
-        <ActivityPanel />
-      </div>
+      <FeatureUnavailableNotice
+        icon={AssignmentOutlined}
+        title="Task insights aren't available yet"
+      >
+        Task counts, status breakdowns, upcoming deadlines and recent activity
+        will appear here once the server provides task endpoints.
+      </FeatureUnavailableNotice>
     </div>
   );
 }
@@ -143,10 +131,8 @@ function Dashboard() {
   const { user } = useAuth();
 
   return (
-   <DashboardLayout>
-      {(role) => (
-        <DashboardContent role={role} userName={user.name} />
-      )}
+    <DashboardLayout>
+      {(role) => <DashboardContent role={role} user={user} />}
     </DashboardLayout>
   );
 }

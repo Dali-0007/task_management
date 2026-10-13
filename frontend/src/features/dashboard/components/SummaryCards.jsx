@@ -1,32 +1,55 @@
-
 import {
-  AssignmentOutlined,
   Autorenew,
-  CheckCircle,
-  WarningAmberOutlined,
   FolderOutlined,
+  Inventory2Outlined,
+  PersonOutlined,
 } from "@mui/icons-material";
 
-const cardDefinitions = {
-  TEAM_MEMBER: [
-    { label: "My Tasks", value: "12", detail: "Assigned to you", icon: AssignmentOutlined, tone: "indigo" },
-    { label: "In Progress", value: "05", detail: "Currently working", icon: Autorenew, tone: "blue" },
-    { label: "Completed", value: "18", detail: "Tasks finished", icon: CheckCircle, tone: "green" },
-    { label: "Overdue", value: "02", detail: "Need your attention", icon: WarningAmberOutlined, tone: "orange" },
-  ],
-  PROJECT_MANAGER: [
-    { label: "Total Projects", value: "08", detail: "Across your workspace", icon: FolderOutlined, tone: "indigo" },
-    { label: "Active Projects", value: "06", detail: "Currently underway", icon: Autorenew, tone: "blue" },
-    { label: "Total Tasks", value: "64", detail: "Across all projects", icon: AssignmentOutlined, tone: "green" },
-    { label: "Overdue Tasks", value: "07", detail: "Need team attention", icon: WarningAmberOutlined, tone: "orange" },
-  ],
-};
+function buildCards(projects, role, userId) {
+  const count = (predicate) => projects.filter(predicate).length;
 
-function SummaryCards({ role }) {
-  const cards = cardDefinitions[role] ?? cardDefinitions.TEAM_MEMBER;
+  const cards = [
+    {
+      label: "Total Projects",
+      value: projects.length,
+      detail: "Projects you belong to",
+      icon: FolderOutlined,
+      tone: "indigo",
+    },
+    {
+      label: "Active Projects",
+      value: count((project) => project.status === "ACTIVE"),
+      detail: "Currently underway",
+      icon: Autorenew,
+      tone: "blue",
+    },
+    {
+      label: "Archived Projects",
+      value: count((project) => project.status === "ARCHIVED"),
+      detail: "No longer editable",
+      icon: Inventory2Outlined,
+      tone: "orange",
+    },
+  ];
+
+  if (role === "PROJECT_MANAGER") {
+    cards.push({
+      label: "Created by You",
+      value: count((project) => String(project.created_by) === String(userId)),
+      detail: "Projects you started",
+      icon: PersonOutlined,
+      tone: "green",
+    });
+  }
+
+  return cards;
+}
+
+function SummaryCards({ projects, role, userId, isLoading }) {
+  const cards = buildCards(projects, role, userId);
 
   return (
-    <section className="summary-grid" aria-label="Dashboard summary">
+    <section className="summary-grid" aria-label="Dashboard summary" aria-busy={isLoading}>
       {cards.map(({ label, value, detail, icon: Icon, tone }) => (
         <article className="summary-card" key={label}>
           <div className="summary-card-top">
@@ -35,7 +58,7 @@ function SummaryCards({ role }) {
               <Icon fontSize="small" />
             </div>
           </div>
-          <div className="summary-value">{value}</div>
+          <div className="summary-value">{isLoading ? "—" : value}</div>
           <p className="summary-detail">{detail}</p>
         </article>
       ))}
