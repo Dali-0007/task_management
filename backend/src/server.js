@@ -10,6 +10,7 @@ const projectRoutes = require("./routes/projectRoutes");
 const app = express();
 const PORT = process.env.PORT || 5000;
 const projectMemberRoutes = require("./routes/projectMemberRoutes");
+const taskRoutes = require("./routes/taskRoutes");
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -23,6 +24,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/project-membership", projectMemberRoutes);
+app.use("/api/tasks", taskRoutes);
 app.get("/api/health", (req, res) => {
   res.status(200).json({
     success: true,

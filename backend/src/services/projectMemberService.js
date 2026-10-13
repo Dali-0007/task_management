@@ -187,6 +187,14 @@ async function removeProjectMember({ projectId, userId, managerId }) {
       throw error;
     }
 
+    // Tasks may only be assigned to project members.
+    await client.query(
+      `UPDATE tasks
+       SET assignee_id = NULL, updated_at = CURRENT_TIMESTAMP
+       WHERE project_id = $1 AND assignee_id = $2`,
+      [projectId, userId]
+    );
+
     await client.query("COMMIT");
     return result.rows[0];
   } catch (error) {

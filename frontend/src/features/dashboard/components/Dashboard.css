@@ -201,7 +201,10 @@
 }
 
 .project-item {
+  display: block;
   min-width: 0;
+  color: inherit;
+  text-decoration: none;
   padding: 16px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
@@ -270,7 +273,181 @@
   color: var(--color-success-text);
 }
 
+/* Two-column panel rows */
+.dashboard-lower-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+/* Upcoming deadlines */
+.deadline-list,
+.status-breakdown,
+.activity-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.deadline-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 8px;
+  border: 0;
+  border-bottom: 1px solid var(--color-border-light);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.deadline-list li:last-child .deadline-item {
+  border-bottom: 0;
+}
+
+.deadline-item:hover,
+.deadline-item:focus-visible {
+  background: var(--color-primary-softer);
+}
+
+.deadline-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.deadline-copy strong {
+  color: var(--color-text-strong);
+  font-size: var(--font-size-base);
+  overflow-wrap: anywhere;
+}
+
+.deadline-copy span,
+.deadline-date {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.deadline-side {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.deadline-overdue {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+/* Status breakdown */
+.status-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.status-breakdown-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  color: var(--color-text-body);
+  font-size: var(--font-size-sm);
+}
+
+.status-breakdown-label strong {
+  color: var(--color-text-strong);
+}
+
+/* Project progress */
+.project-progress-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.project-progress-label strong {
+  color: var(--color-text-strong);
+}
+
+.project-progress {
+  margin-top: 8px;
+}
+
+/* Recent activity */
+.activity-item {
+  display: flex;
+  gap: 11px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.activity-item:first-child {
+  padding-top: 0;
+}
+
+.activity-item:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.activity-avatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+}
+
+.activity-copy {
+  min-width: 0;
+}
+
+.activity-copy p {
+  margin: 1px 0 4px;
+  color: var(--color-text-body);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.activity-copy p strong {
+  color: var(--color-text-strong);
+}
+
+.activity-copy > span {
+  display: block;
+  color: var(--color-primary);
+  font-size: var(--font-size-xs);
+}
+
+.activity-copy small {
+  display: block;
+  margin-top: 5px;
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-xs);
+}
+
 /* Responsive dashboard */
+@media (max-width: 1250px) {
+  .dashboard-lower-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
 @media (max-width: 760px) {
   .dashboard-welcome {
     align-items: flex-start;

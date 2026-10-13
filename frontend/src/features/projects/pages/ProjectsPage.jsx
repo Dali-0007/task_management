@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { Link as RouterLink } from "react-router-dom";
 import {
   Alert,
   Box,
@@ -11,6 +12,7 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
+  Link,
   MenuItem,
   Paper,
   Stack,
@@ -322,7 +324,14 @@ function ProjectsContent({ role }) {
                   spacing={1}
                 >
                   <Typography component="h3" sx={cardTitleSx}>
-                    {project.name}
+                    <Link
+                      component={RouterLink}
+                      to={`/dashboard/projects/${project.id}/tasks`}
+                      color="inherit"
+                      underline="hover"
+                    >
+                      {project.name}
+                    </Link>
                   </Typography>
                   <Chip
                     size="small"
@@ -532,6 +541,15 @@ function ProjectsContent({ role }) {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDetailsProject(null)}>Close</Button>
+          {detailsProject && (
+            <Button
+              variant="contained"
+              component={RouterLink}
+              to={`/dashboard/projects/${detailsProject.id}/tasks`}
+            >
+              View tasks
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
 

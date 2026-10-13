@@ -62,4 +62,18 @@ async function loginUser({ email, password }) {
   return safeUser;
 }
 
-module.exports = { registerUser, loginUser };
+// Only the display name can be changed here; role and email are not
+// self-service fields.
+async function updateUserName(userId, name) {
+  const result = await pool.query(
+    `UPDATE users
+     SET name = $1
+     WHERE id = $2
+     RETURNING id, name, email, role, created_at`,
+    [name, userId]
+  );
+
+  return result.rows[0] || null;
+}
+
+module.exports = { registerUser, loginUser, updateUserName };

@@ -1,6 +1,10 @@
 
 const jwt = require("jsonwebtoken");
-const { registerUser, loginUser } = require("../services/authService");
+const {
+  registerUser,
+  loginUser,
+  updateUserName,
+} = require("../services/authService");
 
 const COOKIE_NAME = "accessToken";
 
@@ -121,6 +125,48 @@ function getCurrentUser(req, res) {
   });
 }
 
+async function updateCurrentUser(req, res) {
+  try {
+    const { name } = req.body ?? {};
+
+    if (typeof name !== "string" || !name.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Name is required.",
+      });
+    }
+
+    if (name.trim().length > 100) {
+      return res.status(400).json({
+        success: false,
+        message: "Name cannot exceed 100 characters.",
+      });
+    }
+
+    const user = await updateUserName(req.user.id, name.trim());
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User account not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully.",
+      user,
+    });
+  } catch (error) {
+    console.error("Profile update failed:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to update profile.",
+    });
+  }
+}
+
 function signOut(req, res) {
   res.clearCookie(COOKIE_NAME, cookieOptions);
 
@@ -134,5 +180,6 @@ module.exports = {
   signUp,
   signIn,
   getCurrentUser,
+  updateCurrentUser,
   signOut,
 };

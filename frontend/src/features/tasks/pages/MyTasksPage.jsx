@@ -1,8 +1,9 @@
-import { Box, Typography } from "@mui/material";
-import AssignmentOutlined from "@mui/icons-material/AssignmentOutlined";
+import { useMemo, useState } from "react";
+import { Box, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 
 import DashboardLayout from "../../../components/dashboard/DashboardLayout";
-import FeatureUnavailableNotice from "../../../components/common/FeatureUnavailableNotice";
+import useProjects from "../../projects/hooks/useProjects";
+import TaskWorkspace from "../components/TaskWorkspace";
 import {
   eyebrowSx,
   pageHeaderSx,
@@ -10,8 +11,20 @@ import {
   pageTitleSx,
 } from "../../../styles/commonStyles";
 
+const SCOPE_QUERIES = {
+  mine: { assignee: "me" },
+  all: {},
+};
+
 function MyTasksContent({ role }) {
   const isManager = role === "PROJECT_MANAGER";
+  const [scope, setScope] = useState("mine");
+  const { projects } = useProjects();
+
+  const activeProjects = useMemo(
+    () => projects.filter((project) => project.status === "ACTIVE"),
+    [projects]
+  );
 
   return (
     <Box>
@@ -27,13 +40,33 @@ function MyTasksContent({ role }) {
         </Typography>
       </Box>
 
-      <FeatureUnavailableNotice
-        icon={AssignmentOutlined}
-        title="Tasks aren't available yet"
+      <ToggleButtonGroup
+        exclusive
+        size="small"
+        color="primary"
+        value={scope}
+        onChange={(event, value) => value && setScope(value)}
+        aria-label="Which tasks to show"
+        sx={{ mb: 2 }}
       >
-        The server doesn&apos;t provide task endpoints yet. Your tasks will
-        appear here once task management is enabled on the server.
-      </FeatureUnavailableNotice>
+        <ToggleButton value="mine">Assigned to me</ToggleButton>
+        <ToggleButton value="all">All my projects</ToggleButton>
+      </ToggleButtonGroup>
+
+      <TaskWorkspace
+        baseQuery={SCOPE_QUERIES[scope]}
+        filterProjects={projects}
+        createProjects={activeProjects}
+        canCreate={isManager}
+        emptyTitle={scope === "mine" ? "Nothing assigned to you" : "No tasks yet"}
+        emptyMessage={
+          scope === "mine"
+            ? "Tasks assigned to you will appear here."
+            : isManager
+              ? "Create a task to get started."
+              : "Tasks in your projects will appear here."
+        }
+      />
     </Box>
   );
 }
