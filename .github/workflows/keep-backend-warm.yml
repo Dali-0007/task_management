@@ -1,0 +1,25 @@
+# Render's free plan puts the API to sleep after 15 minutes without traffic,
+# and the first request after that can time out through Vercel (502).
+# Pinging the health endpoint every 10 minutes keeps it awake.
+# One always-on free service uses ~744 of the workspace's 750 monthly hours,
+# so don't add a second free Render service while this runs.
+name: Keep backend warm
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping API health endpoint
+        run: |
+          curl --fail --silent --show-error \
+            --max-time 90 --retry 3 --retry-delay 10 --retry-all-errors \
+            https://adn-task-manager-api.onrender.com/api/health
