@@ -4,11 +4,8 @@ import {
   Dashboard as DashboardIcon,
   AssignmentOutlined,
   FolderOutlined,
-  GroupsOutlined,
   Person,
-  SettingsOutlined,
   Close,
-  TaskAlt,
 } from "@mui/icons-material";
 import "./DashboardLayout.css";
 
@@ -18,15 +15,9 @@ const commonItems = [
   { label: "Projects", path: "/dashboard/projects", icon: FolderOutlined },
 ];
 
-function Sidebar({ role, open, onClose }) {
-  const managerItems =
-    role === "PROJECT_MANAGER"
-      ? [{ label: "Team Management", path: "/dashboard/team", icon: GroupsOutlined }]
-      : [];
-
+function Sidebar({ open, onClose }) {
   const items = [
     ...commonItems,
-    ...managerItems,
     { label: "My Profile", path: "/dashboard/profile", icon: Person },
   ];
 
@@ -74,21 +65,6 @@ function Sidebar({ role, open, onClose }) {
             </NavLink>
           ))}
         </nav>
-
-        <div className="sidebar-bottom">
-          <div className="sidebar-help-icon">
-            <TaskAlt />
-          </div>
-          <div>
-            <strong>Stay on track</strong>
-            <p>Small steps, great results.</p>
-          </div>
-        </div>
-
-        <div className="sidebar-settings">
-          <SettingsOutlined fontSize="small" />
-          <span>Workspace settings</span>
-        </div>
       </aside>
     </>
   );

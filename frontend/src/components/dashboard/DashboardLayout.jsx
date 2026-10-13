@@ -23,7 +23,6 @@ function DashboardLayout({ children }) {
   return (
     <div className="dashboard-app">
       <Sidebar
-        role={role}
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />

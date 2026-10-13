@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import {
   Alert,
@@ -27,6 +28,8 @@ import GroupsOutlined from "@mui/icons-material/GroupsOutlined";
 import CalendarMonthOutlined from "@mui/icons-material/CalendarMonthOutlined";
 
 import DashboardLayout from "../../../components/dashboard/DashboardLayout";
+import ManageMembersDialog from "../../../components/projects/ManageMembersDialog";
+import { useAuth } from "../../auth/context/AuthContext";
 import useProjects from "../hooks/useProjects";
 import {
   cardActionsSx,
@@ -60,12 +63,16 @@ function ProjectsContent({ role }) {
     archiveProject,
   } = useProjects();
 
+  const { user } = useAuth();
   const isManager = role === "PROJECT_MANAGER";
 
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
-  const [selectedProject, setSelectedProject] = useState(null);
+  const [detailsProject, setDetailsProject] = useState(null);
+  const [membersProject, setMembersProject] = useState(null);
+  const [membersDialogOpen, setMembersDialogOpen] = useState(false);
+  const [membersChanged, setMembersChanged] = useState(false);
   const [archiveTarget, setArchiveTarget] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState("");
@@ -94,6 +101,22 @@ function ProjectsContent({ role }) {
     setDialogOpen(true);
   }
 
+  function openMembersDialog(project) {
+    setDetailsProject(null);
+    setMembersProject(project);
+    setMembersDialogOpen(true);
+  }
+
+  function closeMembersDialog() {
+    setMembersDialogOpen(false);
+
+    if (membersChanged) {
+      setMembersChanged(false);
+      // Errors are surfaced through the hook's `error` state.
+      loadProjects({ silent: true }).catch(() => {});
+    }
+  }
+
   async function handleSave(event) {
     event.preventDefault();
     setFormError("");
@@ -120,9 +143,9 @@ function ProjectsContent({ role }) {
       setForm(emptyForm);
       setEditingProject(null);
       setActionError("");
-    } catch (error) {
+    } catch (saveError) {
       setFormError(
-        error.response?.data?.message ||
+        saveError.response?.data?.message ||
           "Unable to save the project. Please try again."
       );
     } finally {
@@ -139,17 +162,19 @@ function ProjectsContent({ role }) {
     try {
       await archiveProject(archiveTarget.id);
       setArchiveTarget(null);
-      setSelectedProject(null);
-    } catch (error) {
+
+      if (detailsProject?.id === archiveTarget.id) {
+        setDetailsProject(null);
+      }
+    } catch (archiveError) {
       setActionError(
-        error.response?.data?.message ||
+        archiveError.response?.data?.message ||
           "Unable to archive the project."
       );
     } finally {
       setIsSaving(false);
     }
   }
-
 
   const stats = [
     {
@@ -194,7 +219,7 @@ function ProjectsContent({ role }) {
           <Button
             variant="outlined"
             startIcon={<RefreshIcon />}
-            onClick={loadProjects}
+            onClick={() => loadProjects().catch(() => {})}
             disabled={isLoading}
             sx={headerButtonSx}
           >
@@ -250,7 +275,7 @@ function ProjectsContent({ role }) {
           severity="error"
           sx={{ mb: 2 }}
           action={
-            <Button color="inherit" onClick={loadProjects}>
+            <Button color="inherit" onClick={() => loadProjects().catch(() => {})}>
               Retry
             </Button>
           }
@@ -336,12 +361,25 @@ function ProjectsContent({ role }) {
                   </Box>
                 </Stack>
 
-                <Stack direction="row" sx={cardActionsSx}>
+                <Stack
+                  direction="row"
+                  flexWrap="wrap"
+                  gap={1}
+                  sx={cardActionsSx}
+                >
                   <Button
                     size="small"
-                    onClick={() => setSelectedProject(project)}
+                    onClick={() => setDetailsProject(project)}
                   >
                     View details
+                  </Button>
+
+                  <Button
+                    size="small"
+                    startIcon={<GroupsOutlined />}
+                    onClick={() => openMembersDialog(project)}
+                  >
+                    Manage Members
                   </Button>
 
                   {isManager && project.status === "ACTIVE" && (
@@ -372,6 +410,7 @@ function ProjectsContent({ role }) {
         </Grid>
       )}
 
+      {/* Create and edit project dialog */}
       <Dialog
         open={dialogOpen}
         onClose={() => !isSaving && setDialogOpen(false)}
@@ -398,7 +437,7 @@ function ProjectsContent({ role }) {
                   setForm({ ...form, name: event.target.value })
                 }
                 required
-                inputProps={{ maxLength: 150 }}
+                slotProps={{ htmlInput: { maxLength: 150 } }}
                 fullWidth
                 autoFocus
               />
@@ -430,15 +469,16 @@ function ProjectsContent({ role }) {
         </Box>
       </Dialog>
 
+      {/* Project details dialog */}
       <Dialog
-        open={Boolean(selectedProject)}
-        onClose={() => setSelectedProject(null)}
+        open={Boolean(detailsProject)}
+        onClose={() => setDetailsProject(null)}
         fullWidth
         maxWidth="sm"
       >
         <DialogTitle>Project details</DialogTitle>
         <DialogContent>
-          {selectedProject && (
+          {detailsProject && (
             <Stack spacing={2} sx={{ pt: 0.5 }}>
               <Stack
                 direction="row"
@@ -447,40 +487,42 @@ function ProjectsContent({ role }) {
                 spacing={1}
               >
                 <Typography sx={{ ...cardTitleSx, fontSize: 18 }}>
-                  {selectedProject.name}
+                  {detailsProject.name}
                 </Typography>
                 <Chip
-                  label={selectedProject.status}
+                  label={detailsProject.status}
                   color={
-                    selectedProject.status === "ACTIVE" ? "success" : "default"
+                    detailsProject.status === "ACTIVE" ? "success" : "default"
                   }
                   size="small"
                 />
               </Stack>
+
               <Typography
                 color="text.secondary"
                 sx={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}
               >
-                {selectedProject.description || "No description provided."}
+                {detailsProject.description || "No description provided."}
               </Typography>
+
               <Box>
                 <Box sx={detailRowSx}>
                   <span>Project ID</span>
-                  <span>{selectedProject.id}</span>
+                  <span>{detailsProject.id}</span>
                 </Box>
                 <Box sx={detailRowSx}>
                   <span>Members</span>
-                  <span>{selectedProject.member_count ?? 0}</span>
+                  <span>{detailsProject.member_count ?? 0}</span>
                 </Box>
                 <Box sx={detailRowSx}>
                   <span>Created by user ID</span>
-                  <span>{selectedProject.created_by}</span>
+                  <span>{detailsProject.created_by}</span>
                 </Box>
                 <Box sx={detailRowSx}>
                   <span>Last updated</span>
                   <span>
-                    {selectedProject.updated_at
-                      ? new Date(selectedProject.updated_at).toLocaleString()
+                    {detailsProject.updated_at
+                      ? new Date(detailsProject.updated_at).toLocaleString()
                       : "—"}
                   </span>
                 </Box>
@@ -489,10 +531,21 @@ function ProjectsContent({ role }) {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setSelectedProject(null)}>Close</Button>
+          <Button onClick={() => setDetailsProject(null)}>Close</Button>
         </DialogActions>
       </Dialog>
 
+      {/* Project membership dialog */}
+      <ManageMembersDialog
+        open={membersDialogOpen}
+        onClose={closeMembersDialog}
+        onMembersChanged={() => setMembersChanged(true)}
+        project={membersProject}
+        role={role}
+        currentUserId={user?.id}
+      />
+
+      {/* Archive confirmation dialog */}
       <Dialog
         open={Boolean(archiveTarget)}
         onClose={() => !isSaving && setArchiveTarget(null)}
@@ -505,8 +558,8 @@ function ProjectsContent({ role }) {
             <Box component="strong" sx={{ color: "text.primary" }}>
               {archiveTarget?.name}
             </Box>
-            ? It will remain in the database, but it will no longer be
-            editable through the current project update endpoint.
+            ? It will remain in the database, but it will no longer be editable
+            through the current project update endpoint.
           </Typography>
         </DialogContent>
         <DialogActions>

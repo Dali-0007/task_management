@@ -14,8 +14,8 @@ export default function useProjects() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const loadProjects = useCallback(async () => {
-    setIsLoading(true);
+  const loadProjects = useCallback(async ({ silent = false } = {}) => {
+    if (!silent) setIsLoading(true);
     setError("");
 
     try {
@@ -26,7 +26,7 @@ export default function useProjects() {
       setError(getErrorMessage(error));
       throw error;
     } finally {
-      setIsLoading(false);
+      if (!silent) setIsLoading(false);
     }
   }, []);
 
